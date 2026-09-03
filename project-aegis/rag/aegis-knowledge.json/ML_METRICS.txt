@@ -1,8 +1,0 @@
-Aegis synthetic-data ML training metrics
-{
-  "rows": 30000,
-  "fraud_rate": 0.22076666666666667,
-  "roc_auc": 0.7915112501261224,
-  "pr_auc": 0.5720271077930522,
-  "model_size_kb": 122.5
-}
