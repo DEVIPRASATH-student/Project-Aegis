@@ -1,0 +1,64 @@
+{
+  "project": "Aegis ML Upgrade",
+  "description": "CPU-friendly hybrid ML layer for Project Aegis.",
+  "format_version": "1.0",
+  "files": [
+    {
+      "path": "requirements-ml.txt",
+      "type": "text",
+      "content": "scikit-learn==1.7.1\njoblib==1.5.1\npandas==2.3.2\nnumpy==2.3.2\n"
+    },
+    {
+      "path": "ML_METRICS.txt",
+      "type": "text",
+      "content": "Aegis synthetic-data ML training metrics\n{\n  \"rows\": 30000,\n  \"fraud_rate\": 0.22076666666666667,\n  \"roc_auc\": 0.7915112501261224,\n  \"pr_auc\": 0.5720271077930522,\n  \"model_size_kb\": 122.5\n}"
+    },
+    {
+      "path": "backend/ml/__init__.py",
+      "type": "text",
+      "content": ""
+    },
+    {
+      "path": "backend/ml/README.md",
+      "type": "text",
+      "content": "# Aegis ML Upgrade\n\nThis adds a CPU-friendly hybrid ML layer to the existing Aegis architecture.\n\n## Why this model?\n\n`HistGradientBoostingClassifier` is a strong fit for tabular fraud features:\n- fast training/inference on CPU\n- captures nonlinear interactions\n- no neural-network infrastructure\n- compact serialized artifact\n- works well for mixed behavioral/risk features\n\n## Important\n\nThe included dataset is **synthetic demo data**. It is useful for demonstrating the ML pipeline, not for claiming real-world fraud-detection accuracy.\n\nFor production, retrain and validate on institution-approved, privacy-safe transaction data with confirmed fraud labels and time-based validation.\n\n## Train\n\nFrom `backend/`:\n\n```bash\npip install -r requirements.txt\npython -m ml.train_model\n```\n\nThe trained artifact is written to:\n\n```text\nbackend/ml/artifacts/aegis_fraud_model.joblib\n```\n\n## Features\n\n- transaction amount\n- graph distance to known risk node\n- screen-share demo signal\n- new beneficiary\n- beneficiary age\n- device change\n- transaction velocity\n- unusual hour\n- sender account age\n- amount-vs-average ratio\n- prior fraud reports\n\n## Integration\n\n`services/risk_scorer.py` can call:\n\n```python\nfrom ml.model import predict_fraud_probability\n```\n\nand combine the probability with the explainable NetworkX graph signal.\n\nDo not use a model probability alone to freeze real customer funds. Production decisions require authorized banking controls, calibrated thresholds, monitoring, human/step-up review where appropriate, and regulatory/compliance validation.\n"
+    },
+    {
+      "path": "backend/ml/model.py",
+      "type": "text",
+      "content": "from __future__ import annotations\n\nfrom pathlib import Path\nfrom joblib import load\n\nfrom .features import make_features\n\nMODEL_PATH = Path(__file__).resolve().parent / \"artifacts\" / \"aegis_fraud_model.joblib\"\n\n_model = None\n\ndef get_model():\n    global _model\n    if _model is None:\n        if not MODEL_PATH.exists():\n            raise FileNotFoundError(\n                f\"Trained model not found at {MODEL_PATH}. \"\n                \"Run: python -m ml.train_model\"\n            )\n        _model = load(MODEL_PATH)\n    return _model\n\ndef predict_fraud_probability(transaction: dict) -> float:\n    model = get_model()\n    x = [make_features(transaction)]\n    return float(model.predict_proba(x)[0][1])\n"
+    },
+    {
+      "path": "backend/ml/risk_scorer_upgrade.py",
+      "type": "text",
+      "content": "from __future__ import annotations\n\nfrom .graph_engine import graph_engine\nfrom ..ml.model import predict_fraud_probability\n\ndef score_transaction(payload: dict) -> dict:\n    \"\"\"\n    Hybrid Aegis score:\n      - ML estimates transaction fraud probability.\n      - Network graph provides an explainable structural signal.\n      - Demo telemetry is already a model feature.\n\n    The final score is intentionally conservative: ML is the main signal,\n    while graph proximity provides an explicit containment boost.\n    \"\"\"\n    graph_result = graph_engine.evaluate_receiver(payload[\"receiver\"])\n    ml_payload = {\n        **payload,\n        \"graph_hops\": graph_result.get(\"hops\", 99),\n    }\n\n    probability = predict_fraud_probability(ml_payload)\n    graph_score = 100 if graph_result.get(\"hops\", 99) <= 3 else 0\n\n    # 75% learned probability + 25% explainable graph signal.\n    final_score = round(75 * probability + 0.25 * graph_score)\n\n    if final_score >= 75:\n        level = \"HIGH\"\n    elif final_score >= 45:\n        level = \"MEDIUM\"\n    else:\n        level = \"LOW\"\n\n    return {\n        \"risk_score\": final_score,\n        \"risk_level\": level,\n        \"ml_probability\": round(probability, 4),\n        \"graph_score\": graph_score,\n        \"graph\": graph_result,\n    }\n"
+    },
+    {
+      "path": "backend/ml/train_model.py",
+      "type": "text",
+      "content": "from __future__ import annotations\n\nfrom pathlib import Path\nimport pandas as pd\nfrom joblib import dump\nfrom sklearn.ensemble import HistGradientBoostingClassifier\nfrom sklearn.metrics import (\n    average_precision_score,\n    classification_report,\n    roc_auc_score,\n)\nfrom sklearn.model_selection import train_test_split\n\nfrom .features import FEATURE_NAMES\n\nROOT = Path(__file__).resolve().parent\nDATA = ROOT / \"artifacts\" / \"training_data.csv\"\nMODEL = ROOT / \"artifacts\" / \"aegis_fraud_model.joblib\"\n\ndef main():\n    df = pd.read_csv(DATA)\n    X = df[[\n        \"amount\", \"graph_hops\", \"screen_share\", \"new_beneficiary\",\n        \"beneficiary_age_days\", \"device_change\", \"velocity_1h\",\n        \"velocity_24h\", \"odd_hour\", \"sender_age_days\",\n        \"amount_to_avg_ratio\", \"prior_fraud_reports\"\n    ]].copy()\n\n    # Match inference-time transformations.\n    X[\"amount\"] = X[\"amount\"].clip(lower=1).map(__import__(\"math\").log1p)\n    X[\"beneficiary_age_days\"] = X[\"beneficiary_age_days\"].clip(lower=0).map(__import__(\"math\").log1p)\n    X[\"sender_age_days\"] = X[\"sender_age_days\"].clip(lower=1).map(__import__(\"math\").log1p)\n    X[\"amount_to_avg_ratio\"] = X[\"amount_to_avg_ratio\"].clip(lower=.01).map(__import__(\"math\").log)\n    X = X.rename(columns={\n        \"amount\": \"log_amount\",\n        \"beneficiary_age_days\": \"log_beneficiary_age_days\",\n        \"sender_age_days\": \"log_sender_age_days\",\n        \"amount_to_avg_ratio\": \"log_amount_to_avg_ratio\",\n    })\n    y = df[\"is_fraud\"]\n\n    X_train, X_test, y_train, y_test = train_test_split(\n        X, y, test_size=.20, random_state=42, stratify=y\n    )\n\n    # Fast CPU-friendly model. class_weight helps with fraud imbalance.\n    model = HistGradientBoostingClassifier(\n        learning_rate=0.08,\n        max_iter=220,\n        max_leaf_nodes=31,\n        min_samples_leaf=35,\n        l2_regularization=1.0,\n        class_weight=\"balanced\",\n        random_state=42,\n    )\n    model.fit(X_train, y_train)\n\n    p = model.predict_proba(X_test)[:, 1]\n    print(f\"Rows: {len(df):,}\")\n    print(f\"Fraud rate: {y.mean():.3%}\")\n    print(f\"ROC-AUC: {roc_auc_score(y_test, p):.4f}\")\n    print(f\"PR-AUC:  {average_precision_score(y_test, p):.4f}\")\n    print(classification_report(y_test, p >= .50, digits=4))\n\n    dump(model, MODEL, compress=3)\n    print(f\"Saved model: {MODEL}\")\n\nif __name__ == \"__main__\":\n    main()\n"
+    },
+    {
+      "path": "backend/ml/features.py",
+      "type": "text",
+      "content": "from __future__ import annotations\n\nimport math\nfrom typing import Mapping, Any\n\nFEATURE_NAMES = [\n    \"log_amount\",\n    \"graph_hops\",\n    \"screen_share\",\n    \"new_beneficiary\",\n    \"log_beneficiary_age_days\",\n    \"device_change\",\n    \"velocity_1h\",\n    \"velocity_24h\",\n    \"odd_hour\",\n    \"log_sender_age_days\",\n    \"log_amount_to_avg_ratio\",\n    \"prior_fraud_reports\",\n]\n\ndef make_features(tx: Mapping[str, Any]) -> list[float]:\n    amount = max(float(tx.get(\"amount\", 0)), 1.0)\n    beneficiary_age = max(float(tx.get(\"beneficiary_age_days\", 365)), 0.0)\n    sender_age = max(float(tx.get(\"sender_age_days\", 365)), 1.0)\n    ratio = max(float(tx.get(\"amount_to_avg_ratio\", 1.0)), 0.01)\n\n    return [\n        math.log1p(amount),\n        float(tx.get(\"graph_hops\", 99)),\n        float(bool(tx.get(\"screen_share\", False))),\n        float(bool(tx.get(\"new_beneficiary\", False))),\n        math.log1p(beneficiary_age),\n        float(bool(tx.get(\"device_change\", False))),\n        float(tx.get(\"velocity_1h\", 0)),\n        float(tx.get(\"velocity_24h\", 0)),\n        float(bool(tx.get(\"odd_hour\", False))),\n        math.log1p(sender_age),\n        math.log(ratio),\n        float(tx.get(\"prior_fraud_reports\", 0)),\n    ]\n"
+    },
+    {
+      "path": "backend/ml/artifacts/aegis_fraud_model.joblib",
+      "type": "binary",
+      "size_bytes": 125398,
+      "note": "Binary artifact retained in the original ZIP; not embedded in JSON."
+    },
+    {
+      "path": "backend/ml/artifacts/training_data.csv",
+      "type": "binary",
+      "size_bytes": 2757909,
+      "note": "Binary artifact retained in the original ZIP; not embedded in JSON."
+    },
+    {
+      "path": "backend/ml/artifacts/.gitkeep",
+      "type": "text",
+      "content": ""
+    }
+  ]
+}
