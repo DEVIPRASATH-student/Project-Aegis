@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base Reset ─────────────────────────────────────────────── */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #111111;
+  background-color: #F7F7F5;
+  line-height: 1.5;
+}
+
+/* ── Typography Utilities ───────────────────────────────────── */
+
+.text-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666666;
+}
+
+.text-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Card Component ─────────────────────────────────────────── */
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+}
+
+.card-elevated {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Button Base ────────────────────────────────────────────── */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  background-color: #111111;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.btn-primary:hover {
+  background-color: #333333;
+}
+
+.btn-primary:disabled {
+  background-color: #999999;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  background-color: transparent;
+  color: #111111;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #E5E5E5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.btn-outline:hover {
+  border-color: #111111;
+  background-color: #F7F7F5;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  background-color: #CC2936;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.btn-danger:hover {
+  background-color: #A8212C;
+}
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  background-color: #1B7A3D;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.btn-success:hover {
+  background-color: #156231;
+}
+
+/* ── Form Inputs ────────────────────────────────────────────── */
+
+.input-field {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #111111;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.input-field:focus {
+  border-color: #111111;
+}
+
+.input-field::placeholder {
+  color: #999999;
+}
+
+/* ── Alert Banner ───────────────────────────────────────────── */
+
+.alert-critical {
+  background-color: #FEF2F2;
+  border: 1px solid #CC2936;
+  border-left: 4px solid #CC2936;
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+}
+
+.alert-info {
+  background-color: #F7F7F5;
+  border: 1px solid #E5E5E5;
+  border-left: 4px solid #666666;
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+}
+
+/* ── Status Badges ──────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+}
+
+.badge-success {
+  background-color: #ECFDF5;
+  color: #1B7A3D;
+}
+
+.badge-danger {
+  background-color: #FEF2F2;
+  color: #CC2936;
+}
+
+.badge-warning {
+  background-color: #FFFBEB;
+  color: #D4760A;
+}
+
+.badge-neutral {
+  background-color: #F7F7F5;
+  color: #666666;
+}
+
+/* ── Divider ────────────────────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  background-color: #E5E5E5;
+  width: 100%;
+}
+
+/* ── Toggle Switch ──────────────────────────────────────────── */
+
+.toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: #E5E5E5;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.toggle-track.active {
+  background-color: #111111;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  transition: transform 150ms ease;
+}
+
+.toggle-track.active .toggle-thumb {
+  transform: translateX(16px);
+}
+
+/* ── Pulse Animation (for live indicators) ──────────────────── */
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E5E5E5;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+}
