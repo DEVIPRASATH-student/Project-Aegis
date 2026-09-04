@@ -2,18 +2,15 @@ import { useState, useEffect } from 'react'
 import { useEscrowPoller } from '../hooks/useTelemetry'
 import { getAllTransactions, resetDemo } from '../api/client'
 import EscrowCard from '../components/EscrowCard'
+import { GradientBackground } from '@/components/ui/dark-gradient-background'
 
 /**
  * Project Aegis -- Co-Signer Dashboard Page
  *
  * Route: /dashboard
  *
- * This is the trusted co-signer interface. It shows a security
- * operations view with active escrow alerts, protected funds
- * overview, and action buttons.
- *
- * Polls the backend every 2.5 seconds for new escrow transactions.
- * Substantially different visual style from the victim interface.
+ * This is the trusted co-signer interface styled with the dark gradient
+ * background to deliver a high-tech SOC security overview.
  */
 
 const MONITORED_USER = 'A'  // Demo: monitoring Dad's account
@@ -70,21 +67,21 @@ export default function CoSignerAlerts() {
   const visibleTransactions = transactions.filter(tx => !resolvedIds.has(tx.transaction_id))
 
   return (
-    <div className="min-h-screen bg-aegis-offwhite">
+    <GradientBackground className="min-h-screen">
       {/* Header */}
-      <header className="bg-aegis-black text-white">
+      <header className="bg-black/40 backdrop-blur-md border-b border-white/10 text-white">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 border border-white/20 rounded flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-8 h-8 bg-cyan-500/20 border border-cyan-400/40 rounded flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-sm font-semibold tracking-tight">
+              <h1 className="text-sm font-semibold text-white tracking-tight">
                 Project Aegis
               </h1>
-              <p className="text-2xs text-white/50">
+              <p className="text-2xs text-cyan-200/70">
                 Trusted Co-Signer Dashboard
               </p>
             </div>
@@ -94,13 +91,13 @@ export default function CoSignerAlerts() {
             {/* Live indicator */}
             <div className="flex items-center gap-1.5">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-status-success pulse-dot" />
-              <span className="text-2xs text-white/50 font-mono">LIVE</span>
+              <span className="text-2xs text-white/70 font-mono">LIVE</span>
             </div>
 
             {/* Demo reset */}
             <button
               onClick={handleDemoReset}
-              className="text-2xs text-white/30 hover:text-white/60 font-mono transition-colors"
+              className="text-2xs text-white/40 hover:text-white font-mono transition-colors"
               title="Reset demo state"
             >
               reset
@@ -110,8 +107,8 @@ export default function CoSignerAlerts() {
       </header>
 
       {/* Overview Stats */}
-      <div className="bg-white border-b border-aegis-border">
-        <div className="max-w-4xl mx-auto px-6 py-5">
+      <div className="max-w-4xl mx-auto px-6 pt-6">
+        <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-lg p-6 shadow-xl">
           <div className="grid grid-cols-3 gap-6">
             <div>
               <p className="text-label mb-1">Protected Funds</p>
@@ -140,8 +137,8 @@ export default function CoSignerAlerts() {
       <main className="max-w-4xl mx-auto px-6 py-6">
         {/* Connection Error */}
         {error && (
-          <div className="alert-info mb-4">
-            <p className="text-sm text-aegis-charcoal">
+          <div className="alert-critical mb-4">
+            <p className="text-sm text-red-200">
               Unable to connect to the security layer. Retrying...
             </p>
           </div>
@@ -150,22 +147,22 @@ export default function CoSignerAlerts() {
         {/* Active Escrow Alerts */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-aegis-black uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
               Active Alerts
             </h2>
-            <span className="text-2xs text-aegis-midgray font-mono">
+            <span className="text-2xs text-cyan-200/60 font-mono">
               Polling every 2.5s
             </span>
           </div>
 
           {loading && visibleTransactions.length === 0 && (
-            <div className="card p-8 text-center">
+            <div className="card bg-white/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-8 text-center">
               <p className="text-sm text-aegis-gray">Loading...</p>
             </div>
           )}
 
           {!loading && visibleTransactions.length === 0 && (
-            <div className="card p-8 text-center">
+            <div className="card bg-white/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-8 text-center">
               <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-aegis-offwhite flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -194,10 +191,10 @@ export default function CoSignerAlerts() {
         {/* Transaction History */}
         {history.length > 0 && (
           <section className="mt-8">
-            <h2 className="text-sm font-semibold text-aegis-black uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
               Transaction History
             </h2>
-            <div className="card overflow-hidden">
+            <div className="card bg-white/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-aegis-offwhite border-b border-aegis-border">
@@ -251,6 +248,6 @@ export default function CoSignerAlerts() {
           </section>
         )}
       </main>
-    </div>
+    </GradientBackground>
   )
 }

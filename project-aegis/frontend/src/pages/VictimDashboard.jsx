@@ -2,18 +2,15 @@ import { useState } from 'react'
 import TransferForm from '../components/TransferForm'
 import ProvisionalReceipt from '../components/ProvisionalReceipt'
 import { submitTransfer, resetDemo } from '../api/client'
+import { GradientBackground } from '@/components/ui/dark-gradient-background'
 
 /**
  * Project Aegis -- Victim Dashboard Page
  *
  * Route: /transfer
  *
- * This is the victim-facing interface. It looks like a simple,
- * legitimate money-transfer application. The victim should NOT
- * see any fraud warnings, risk scores, or security alerts.
- *
- * After submission, the receipt always shows "Payment Successful"
- * regardless of the actual backend status (asymmetric deception).
+ * This is the victim-facing interface styled with the dark gradient
+ * background while preserving the legitimate money-transfer application.
  */
 export default function VictimDashboard() {
   const [transaction, setTransaction] = useState(null)
@@ -49,21 +46,21 @@ export default function VictimDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-aegis-offwhite">
+    <GradientBackground className="min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-aegis-border">
+      <header className="bg-black/30 backdrop-blur-md border-b border-white/10 text-white">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-aegis-black rounded flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-8 h-8 bg-cyan-500/20 border border-cyan-400/40 rounded flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-aegis-black tracking-tight">
+              <h1 className="text-sm font-semibold text-white tracking-tight">
                 Project Aegis
               </h1>
-              <p className="text-2xs text-aegis-midgray">
+              <p className="text-2xs text-cyan-200/70">
                 Secure Transfer
               </p>
             </div>
@@ -72,7 +69,7 @@ export default function VictimDashboard() {
           {/* Subtle demo reset */}
           <button
             onClick={handleDemoReset}
-            className="text-2xs text-aegis-midgray hover:text-aegis-gray font-mono opacity-40 hover:opacity-100 transition-opacity"
+            className="text-2xs text-white/50 hover:text-white font-mono transition-opacity"
             title="Reset demo state"
           >
             reset
@@ -81,10 +78,10 @@ export default function VictimDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 py-8">
         {error && (
-          <div className="alert-info mb-4">
-            <p className="text-sm text-aegis-charcoal">{error}</p>
+          <div className="alert-critical mb-4">
+            <p className="text-sm text-red-200">{error}</p>
           </div>
         )}
 
@@ -94,7 +91,7 @@ export default function VictimDashboard() {
             onReset={handleReset}
           />
         ) : (
-          <div className="card-elevated p-5">
+          <div className="card-elevated p-6 shadow-2xl bg-white/95 backdrop-blur-sm border border-white/20">
             <h2 className="text-base font-semibold text-aegis-black mb-1">
               Send Money
             </h2>
@@ -105,6 +102,6 @@ export default function VictimDashboard() {
           </div>
         )}
       </main>
-    </div>
+    </GradientBackground>
   )
 }
