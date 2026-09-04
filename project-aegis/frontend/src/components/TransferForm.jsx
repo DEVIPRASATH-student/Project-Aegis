@@ -67,14 +67,15 @@ export default function TransferForm({ onSubmit, loading }) {
         <label className="block text-label mb-1.5" htmlFor="amount">
           Amount (INR)
         </label>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-aegis-gray text-sm">
+        <div className="relative flex items-center">
+          <span className="absolute left-3.5 text-aegis-gray text-sm font-medium pointer-events-none select-none">
             INR
           </span>
           <input
             id="amount"
             type="number"
-            className="input-field pl-12"
+            className="input-field pl-14"
+            style={{ paddingLeft: '3.75rem' }}
             placeholder="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
